@@ -17,3 +17,5 @@ Ana another another test commit
 Test commit for Thomas
 
 Test commit for pulling
+
+Test commit for merging
