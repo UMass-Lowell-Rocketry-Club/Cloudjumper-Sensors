@@ -19,3 +19,5 @@ Test commit for Thomas
 Test commit for pulling
 
 Test commit for merging
+
+Test commit for merging 2
