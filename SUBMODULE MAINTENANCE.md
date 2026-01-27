@@ -19,7 +19,7 @@ git submodule add https://github.com/UMass-Lowell-Rocketry-Club/Cloudjumper-Sens
 Adding a submodule is considered a change to the main repository. Add this change and commit it to ensure everyone else using this repository has the submodule.
 
 ```bash
-git add Cloudjumper-Sensors
+git add -A
 git commit -m "added Cloudjumper-Sensors submodule"
 git push
 ```
