@@ -1,0 +1,13 @@
+[setup]
+serial_port = "/dev/ttyS0" # Device 
+is_vehicle = true
+vehicle_address = 0xffff
+ground_address = 0x00ff
+frequency = 915          # [MHz] FCC unlicensed between 902-928MHz
+transmit_power = 22      # [dBm]
+air_speed = 2400 # [bps] Air speed (transmit speed). See sx126x.py for valid options
+
+[setup.vehicle]
+sensors = ["gps"]
+
+#[setup.ground]

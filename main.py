@@ -2,25 +2,21 @@
 
 ## This file contains the code for the radio
 import sys
-#import sx126x # LoRa HAT
+import sx126x # LoRa HAT
+import tomllib # Read configuration file
+import time
 
-config = {
-    "frequency_mhz": 915, # FCC unlicensed between 902-928MHz
-    "transmit_power_dbm": 22,
-    "ground_station_address": 0, # Addresses MUST be different for ground station & rocket
-    "vehicle_address": 65535,
-    "air_speed": 2400 # Air speed (transmit speed) in bits per second. See sx126x.py for valid options
-}
+config = None
+with open("config.toml", "rb") as f:
+    config = tomllib.load(f)
+assert(config is not None)
 
-def init_radio():
-    return
-    #radio = sx126x.sx126x(serial_num = "/dev/ttyS0",freq=config["frequency_mhz"],addr=config["frequency_mhz"],power=config["transmit_power_dbm"],rssi=True,air_speed=2400,relay=False)
-    #
-    # the sending message format
-    #
-    #         receiving node              receiving node                   receiving node           own high 8bit           own low 8bit                 own 
-    #         high 8bit address           low 8bit address                    frequency                address                 address                  frequency             message payload
-   # data = bytes([int(config["address"])>>8]) + bytes([int(config["address"])&0xff]) + bytes([]) + bytes([65535>>8]) + bytes([65535&0xff]) + bytes([node.offset_freq]) + get_t[2].encode()
+radio = None
+is_vehicle = config["setup"]["is_vehicle"]
+radio_address = config["setup"]["vehicle_address"] if is_vehicle else config["setup"]["ground_address"]
+send_address = config["setup"]["vehicle_address"] if not is_vehicle else config["setup"]["ground_address"]
+    
+
 
 def test_message_format():
     get_rec = ""
@@ -28,24 +24,19 @@ def test_message_format():
     print("input a string such as \033[1;32m0,868,Hello World\033[0m,it will send `Hello World` to lora node device of address 0 with 868M ")
     print("please input and press Enter key:",end='',flush=True)
 
-    while True:
-        rec = sys.stdin.read(1)
-        if rec != None:
-            if rec == '\x0a': break
-            get_rec += rec
-            sys.stdout.write(rec)
-            sys.stdout.flush()
-
-    get_t = get_rec.split(",")
-
-    offset_frequence = int(get_t[1])-(850 if int(get_t[1])>850 else 410)
+    offset_frequence = int(915)-(850 if int(915)>850 else 410)
+    radio = sx126x.sx126x(serial_num = "/dev/ttyS0",freq=config["setup"]["frequency_mhz"],addr=radio_address,power=config["setup"]["transmit_power_dbm"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
     #
     # the sending message format
     #
     #         receiving node              receiving node                   receiving node           own high 8bit           own low 8bit                 own 
     #         high 8bit address           low 8bit address                    frequency                address                 address                  frequency             message payload
-    data = bytes([int(get_t[0])>>8]) + bytes([int(get_t[0])&0xff]) + bytes([offset_frequence]) + bytes([65535>>8]) + bytes([65535&0xff]) + bytes([offset_frequence]) + get_t[2].encode()
+    data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + "Hello from Vehicle".encode()
+
     print(data)
+    while True:
+        radio.send(data)
+        time.sleep(0.5)
 
 
 
