@@ -95,7 +95,7 @@ class sx126x:
 
         # The hardware UART of Pi3B+,Pi4B is /dev/ttyS0
         self.ser = serial.Serial(serial_num,9600)
-        self.ser.flushInput()
+        self.ser.reset_input_buffer()
         self.set(freq,addr,power,rssi,air_speed,net_id,buffer_size,crypt,relay,lbt,wor)
 
     def set(self,freq,addr,power,rssi,air_speed=2400,\
@@ -174,15 +174,15 @@ class sx126x:
             self.cfg_reg[9] = 0x03 + rssi_temp
             self.cfg_reg[10] = h_crypt
             self.cfg_reg[11] = l_crypt
-        self.ser.flushInput()
+        self.ser.reset_input_buffer()
 
         for i in range(2):
             self.ser.write(bytes(self.cfg_reg))
             r_buff = 0
             time.sleep(0.2)
-            if self.ser.inWaiting() > 0:
+            if self.ser.in_waiting() > 0:
                 time.sleep(0.1)
-                r_buff = self.ser.read(self.ser.inWaiting())
+                r_buff = self.ser.read(self.ser.in_waiting())
                 if r_buff[0] == 0xC1:
                     pass
                     # print("parameters setting is :",end='')
@@ -200,7 +200,7 @@ class sx126x:
                 break
             else:
                 print("setting fail,setting again")
-                self.ser.flushInput()
+                self.ser.reset_input_buffer()
                 time.sleep(0.2)
                 print('\x1b[1A',end='\r')
                 if i == 1:
@@ -219,9 +219,9 @@ class sx126x:
         
         # send command to get setting parameters
         self.ser.write(bytes([0xC1,0x00,0x09]))
-        if self.ser.inWaiting() > 0:
+        if self.ser.in_waiting() > 0:
             time.sleep(0.1)
-            self.get_reg = self.ser.read(self.ser.inWaiting())
+            self.get_reg = self.ser.read(self.ser.in_waiting())
         
         # check the return characters from hat and print the setting parameters
         if self.get_reg[0] == 0xC1 and self.get_reg[2] == 0x09:
@@ -252,9 +252,9 @@ class sx126x:
 
 
     def receive(self):
-        if self.ser.inWaiting() > 0:
+        if self.ser.in_waiting() > 0:
             time.sleep(0.5)
-            r_buff = self.ser.read(self.ser.inWaiting())
+            r_buff = self.ser.read(self.ser.in_waiting())
 
             print("Receive from address\033[1;32m %d with frequency %d.125MHz\033[0m"%((r_buff[0]<<8)+r_buff[1],r_buff[2]+self.start_freq),end='\r\n',flush = True)
             print("message is "+str(r_buff[3:-1]),end='\r\n')
@@ -273,13 +273,13 @@ class sx126x:
         GPIO.output(self.M1,GPIO.LOW)
         GPIO.output(self.M0,GPIO.LOW)
         time.sleep(0.1)
-        self.ser.flushInput()
+        self.ser.reset_input_buffer()
         self.ser.write(bytes([0xC0,0xC1,0xC2,0xC3,0x00,0x02]))
         time.sleep(0.5)
         re_temp = bytes(5)
-        if self.ser.inWaiting() > 0:
+        if self.ser.in_waiting() > 0:
             time.sleep(0.1)
-            re_temp = self.ser.read(self.ser.inWaiting())
+            re_temp = self.ser.read(self.ser.in_waiting())
         if re_temp[0] == 0xC1 and re_temp[1] == 0x00 and re_temp[2] == 0x02:
             print("the current noise rssi value: -{0}dBm".format(256-re_temp[3]))
             # print("the last receive packet rssi value: -{0}dBm".format(256-re_temp[4]))
