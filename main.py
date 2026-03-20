@@ -20,7 +20,8 @@ is_delaying = False
 output_print_delay = config["setup"]["output_print_delay"] or 5 # Seconds
 
 def delay(seconds: int):
-    if is_delaying is True:
+    global is_delaying
+    if is_delaying:
         return
     is_delaying = True
     time.sleep(seconds)
