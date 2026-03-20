@@ -96,6 +96,7 @@ class sx126x:
         # The hardware UART of Pi3B+,Pi4B is /dev/ttyS0
         self.ser = serial.Serial(serial_num,9600)
         self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
         self.set(freq,addr,power,rssi,air_speed,net_id,buffer_size,crypt,relay,lbt,wor)
 
     def set(self,freq,addr,power,rssi,air_speed=2400,\
@@ -211,6 +212,8 @@ class sx126x:
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.LOW)
         time.sleep(0.1)
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
 
     def get_settings(self):
         # the pin M1 of lora HAT must be high when enter setting mode and get parameters
@@ -254,11 +257,12 @@ class sx126x:
 
     def receive(self):
         if self.ser.in_waiting > 0:
-            r_buff = self.ser.read(self.ser.in_waiting + 1)
+            r_buff = self.ser.read(self.ser.in_waiting)
+            self.ser.reset_input_buffer()
 
             #print("Receive from address\033[1;32m %d with frequency %d.125MHz\033[0m"%((r_buff[0]<<8)+r_buff[1],r_buff[2]+self.start_freq),end='\r\n',flush = True)
             #print("message is "+str(r_buff[3:-1]),end='\r\n')
-            print("Raw Message: " + str(r_buff))
+            print("Raw Message: " + str(r_buff), end='\r\n')
             
             # print the rssi
             if self.rssi:
