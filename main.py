@@ -45,9 +45,11 @@ def test_message_format():
 
     while True:
         if is_vehicle:
-            print("Sending...")
+            if not is_delaying:
+                print("Sending...")
             radio.send(data)
             time.sleep(2)
+            threading.Thread(target=delay, args=output_print_delay).start()
         else:
             radio.receive()
             if not is_delaying:
