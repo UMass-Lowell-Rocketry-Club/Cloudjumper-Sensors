@@ -5,6 +5,7 @@ import sys
 import sx126x # LoRa HAT
 import tomllib # Read configuration file
 import time
+import threading
 
 config = None
 with open("config.toml", "rb") as f:
@@ -15,8 +16,15 @@ radio = None
 is_vehicle = config["setup"]["is_vehicle"]
 radio_address = config["setup"]["vehicle_address"] if is_vehicle else config["setup"]["ground_address"]
 send_address = config["setup"]["vehicle_address"] if not is_vehicle else config["setup"]["ground_address"]
-    
+is_delaying = False
+output_print_delay = config["setup"]["output_print_delay"] or 5 # Seconds
 
+def delay(seconds: int):
+    if is_delaying:
+        return
+    is_delaying = True
+    time.sleep(seconds)
+    is_delaying = False
 
 def test_message_format():
     get_rec = ""
@@ -25,18 +33,27 @@ def test_message_format():
     print("please input and press Enter key:",end='',flush=True)
 
     offset_frequence = int(915)-(850 if int(915)>850 else 410)
-    radio = sx126x.sx126x(serial_num = "/dev/ttyS0",freq=config["setup"]["frequency_mhz"],addr=radio_address,power=config["setup"]["transmit_power_dbm"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
+    radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
     #
     # the sending message format
     #
     #         receiving node              receiving node                   receiving node           own high 8bit           own low 8bit                 own 
     #         high 8bit address           low 8bit address                    frequency                address                 address                  frequency             message payload
-    data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + "Hello from Vehicle".encode()
+    msg = "HelloFromVehicle"
+    msg = msg.encode()
+    data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
 
-    print(data)
     while True:
-        radio.send(data)
-        time.sleep(0.5)
+        if is_vehicle:
+            print("Sending...")
+            radio.send(data)
+            time.sleep(2)
+        else:
+            radio.receive()
+            if not is_delaying:
+                print("Receiving...")
+                continue
+            threading.Thread(target=delay, args=output_print_delay).start()
 
 
 
