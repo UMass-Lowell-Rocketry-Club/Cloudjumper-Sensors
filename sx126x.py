@@ -180,9 +180,9 @@ class sx126x:
             self.ser.write(bytes(self.cfg_reg))
             r_buff = 0
             time.sleep(0.2)
-            if self.ser.in_waiting() > 0:
+            if self.ser.in_waiting > 0:
                 time.sleep(0.1)
-                r_buff = self.ser.read(self.ser.in_waiting())
+                r_buff = self.ser.read(self.ser.in_waiting)
                 if r_buff[0] == 0xC1:
                     pass
                     # print("parameters setting is :",end='')
@@ -219,9 +219,9 @@ class sx126x:
         
         # send command to get setting parameters
         self.ser.write(bytes([0xC1,0x00,0x09]))
-        if self.ser.in_waiting() > 0:
+        if self.ser.in_waiting > 0:
             time.sleep(0.1)
-            self.get_reg = self.ser.read(self.ser.in_waiting())
+            self.get_reg = self.ser.read(self.ser.in_waiting)
         
         # check the return characters from hat and print the setting parameters
         if self.get_reg[0] == 0xC1 and self.get_reg[2] == 0x09:
@@ -253,9 +253,9 @@ class sx126x:
 
 
     def receive(self):
-        if self.ser.in_waiting() > 0:
+        if self.ser.in_waiting > 0:
             time.sleep(0.5)
-            r_buff = self.ser.read(self.ser.in_waiting())
+            r_buff = self.ser.read(self.ser.in_waiting)
 
             print("Receive from address\033[1;32m %d with frequency %d.125MHz\033[0m"%((r_buff[0]<<8)+r_buff[1],r_buff[2]+self.start_freq),end='\r\n',flush = True)
             print("message is "+str(r_buff[3:-1]),end='\r\n')
@@ -278,9 +278,9 @@ class sx126x:
         self.ser.write(bytes([0xC0,0xC1,0xC2,0xC3,0x00,0x02]))
         time.sleep(0.5)
         re_temp = bytes(5)
-        if self.ser.in_waiting() > 0:
+        if self.ser.in_waiting > 0:
             time.sleep(0.1)
-            re_temp = self.ser.read(self.ser.in_waiting())
+            re_temp = self.ser.read(self.ser.in_waiting)
         if re_temp[0] == 0xC1 and re_temp[1] == 0x00 and re_temp[2] == 0x02:
             print("the current noise rssi value: -{0}dBm".format(256-re_temp[3]))
             # print("the last receive packet rssi value: -{0}dBm".format(256-re_temp[4]))
