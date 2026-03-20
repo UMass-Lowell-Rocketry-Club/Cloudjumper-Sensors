@@ -245,6 +245,7 @@ class sx126x:
         GPIO.output(self.M0,GPIO.LOW)
         time.sleep(0.1)
 
+        self.ser.reset_output_buffer()
         self.ser.write(data)
         # if self.rssi == True:
             # self.get_channel_rssi()
