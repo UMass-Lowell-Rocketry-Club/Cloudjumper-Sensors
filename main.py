@@ -44,7 +44,8 @@ def test_message_format():
     #         receiving node              receiving node                   receiving node           own high 8bit           own low 8bit                 own 
     #         high 8bit address           low 8bit address                    frequency                address                 address                  frequency             message payload
 
-    gps = gps_rocketry()
+    if is_vehicle:
+        gps = gps_rocketry()
 
     while True:
         if is_vehicle:
