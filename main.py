@@ -57,6 +57,7 @@ def test_message_format():
             time.sleep(2)
         else:
             radio.receive()
+            time.sleep(2)
             if not is_delaying:
                 print("Receiving...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()

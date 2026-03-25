@@ -257,11 +257,11 @@ class sx126x:
 
     def receive(self):
         if self.ser.in_waiting > 0:
-            r_buff = self.ser.read(self.ser.in_waiting)
+            r_buff = self.ser.read(size = self.ser.in_waiting)
 
             #print("Receive from address\033[1;32m %d with frequency %d.125MHz\033[0m"%((r_buff[0]<<8)+r_buff[1],r_buff[2]+self.start_freq),end='\r\n',flush = True)
             #print("message is "+str(r_buff[3:-1]),end='\r\n')
-            print("Raw Message: " + str(r_buff), end='\r\n')
+            print(str(r_buff))
             
             # print the rssi
             if self.rssi:
