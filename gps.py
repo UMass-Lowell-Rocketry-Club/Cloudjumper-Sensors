@@ -13,9 +13,9 @@ class gps_rocketry:
         # a slightly higher timeout (GPS modules typically update once a second).
         # These are the defaults you should use for the GPS FeatherWing.
         # Connect UART rx to GPS module TX, and UART tx to GPS module RX.
-        tx = board.TX  # Use board.GP4 or other UART TX on Raspberry Pi Pico boards.
-        rx = board.RX  # Use board.GP5 or other UART RX on Raspberry Pi Pico boards.
-        uart = busio.UART(tx, rx, baudrate=9600, timeout=10)
+        #tx = board.TX  # Use board.GP4 or other UART TX on Raspberry Pi Pico boards.
+        #rx = board.RX  # Use board.GP5 or other UART RX on Raspberry Pi Pico boards.
+        #uart = busio.UART(tx, rx, baudrate=9600, timeout=10)
 
         # for a computer, use the pyserial library for uart access
         # import serial
@@ -27,7 +27,7 @@ class gps_rocketry:
 
         # Create a GPS module instance.
         #gps = adafruit_gps.GPS(uart, debug=False)  # Use UART/pyserial
-        gps = adafruit_gps.GPS_GtopI2C(i2c, debug=True)  # Use I2C interface
+        gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)  # Use I2C interface
 
         # Initialize the GPS module by changing what data it sends and at what rate.
         # These are NMEA extensions for PMTK_314_SET_NMEA_OUTPUT and
