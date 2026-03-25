@@ -28,7 +28,7 @@ class gps_rocketry:
 
         # Create a GPS module instance.
         #gps = adafruit_gps.GPS(uart, debug=False)  # Use UART/pyserial
-        gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)  # Use I2C interface
+        self.gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)  # Use I2C interface
 
         # Initialize the GPS module by changing what data it sends and at what rate.
         # These are NMEA extensions for PMTK_314_SET_NMEA_OUTPUT and
@@ -37,7 +37,7 @@ class gps_rocketry:
         #   https://cdn-shop.adafruit.com/datasheets/PMTK_A11.pdf
 
         # Turn on the basic GGA and RMC info (what you typically want)
-        gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
+        self.gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
         # Turn on the basic GGA and RMC info + VTG for speed in km/h
         # gps.send_command(b"PMTK314,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
         # Turn on just minimum info (RMC only, location):
@@ -48,7 +48,7 @@ class gps_rocketry:
         # gps.send_command(b'PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0')
 
         # Set update rate to once a second (1hz) which is what you typically want.
-        gps.send_command(b"PMTK220,1000")
+        self.gps.send_command(b"PMTK220,1000")
         # Or decrease to once every two seconds by doubling the millisecond value.
         # Be sure to also increase your UART timeout above!
         # gps.send_command(b'PMTK220,2000')
