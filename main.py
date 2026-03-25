@@ -6,7 +6,6 @@ import sx126x # LoRa HAT
 import tomllib # Read configuration file
 import time
 import threading
-from gps import gps_rocketry
 
 config = None
 with open("config.toml", "rb") as f:
@@ -15,6 +14,9 @@ assert(config is not None)
 
 radio = None
 is_vehicle = config["setup"]["is_vehicle"]
+if is_vehicle:
+    from gps import gps_rocketry
+
 radio_address = config["setup"]["vehicle_address"] if is_vehicle else config["setup"]["ground_address"]
 send_address = config["setup"]["vehicle_address"] if not is_vehicle else config["setup"]["ground_address"]
 is_delaying = False
