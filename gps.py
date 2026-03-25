@@ -8,6 +8,7 @@ import adafruit_gps
 
 class gps_rocketry:
     dataMsg: str = ""
+    gps = None
     def __init__(self):
         # Create a serial connection for the GPS connection using default speed and
         # a slightly higher timeout (GPS modules typically update once a second).
@@ -55,60 +56,52 @@ class gps_rocketry:
         # data during parsing.  This would be twice a second (2hz, 500ms delay):
         # gps.send_command(b'PMTK220,500')
 
-        # Main loop runs forever printing the location, etc. every second.
 
-        last_print = time.monotonic()
-        while True:
-            # Make sure to call gps.update() every loop iteration and at least twice
-            # as fast as data comes from the GPS unit (usually every second).
-            # This returns a bool that's true if it parsed new data (you can ignore it
-            # though if you don't care and instead look at the has_fix property).
-            gps.update()
-            # Every second print out current location details if there's a fix.
-            current = time.monotonic()
-            if current - last_print >= 1.0:
-                last_print = current
-                if not gps.has_fix:
-                    # Try again if we don't have a fix yet.
-                    self.dataMsg = "NoFix"
-                    print("Waiting for fix...")
-                    continue
-                self.dataMsg = ""
-                # We have a fix! (gps.has_fix is true)
-                # Print out details about the fix like location, date, etc.
-                print("=" * 40)  # Print a separator line.
-                print(
-                    "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(  # noqa: UP032
-                        gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
-                        gps.timestamp_utc.tm_mday,  # struct_time object that holds
-                        gps.timestamp_utc.tm_year,  # the fix time.  Note you might
-                        gps.timestamp_utc.tm_hour,  # not get all data like year, day,
-                        gps.timestamp_utc.tm_min,  # month!
-                        gps.timestamp_utc.tm_sec,
-                    )
-                )
-                print(f"Latitude: {gps.latitude:.6f} degrees")
-                self.dataMsg += f"Lat {gps.latitude:.6f}"
-                print(f"Longitude: {gps.longitude:.6f} degrees")
-                self.dataMsg += f"Long {gps.longitude:.6f}"
-                print(f"Precise Latitude: {gps.latitude_degrees} degs, {gps.latitude_minutes:2.4f} mins")
-                self.dataMsg += f"PreciseLat {gps.latitude_degrees:.6f}, {gps.latitude_minutes:2.4f}"
-                print(f"Precise Longitude: {gps.longitude_degrees} degs, {gps.longitude_minutes:2.4f} mins")
-                print(f"Fix quality: {gps.fix_quality}")
-                # Some attributes beyond latitude, longitude and timestamp are optional
-                # and might not be present.  Check if they're None before trying to use!
-                if gps.satellites is not None:
-                    print(f"# satellites: {gps.satellites}")
-                if gps.altitude_m is not None:
-                    print(f"Altitude: {gps.altitude_m} meters")
-                    self.dataMsg += f"Alt {gps.altitude_m}"
-                if gps.speed_knots is not None:
-                    print(f"Speed: {gps.speed_knots} knots")
-                if gps.speed_kmh is not None:
-                    print(f"Speed: {gps.speed_kmh} km/h")
-                if gps.track_angle_deg is not None:
-                    print(f"Track angle: {gps.track_angle_deg} degrees")
-                if gps.horizontal_dilution is not None:
-                    print(f"Horizontal dilution: {gps.horizontal_dilution}")
-                if gps.height_geoid is not None:
-                    print(f"Height geoid: {gps.height_geoid} meters")
+    def update_gps_data(self):
+        self.gps.update()
+        # Every second print out current location details if there's a fix.
+        current = time.monotonic()
+        if not self.gps.has_fix:
+            # Try again if we don't have a fix yet.
+            self.dataMsg = "NoFix"
+            print("Waiting for fix...")
+            return
+        self.dataMsg = ""
+        # We have a fix! (gps.has_fix is true)
+        # Print out details about the fix like location, date, etc.
+        print("=" * 40)  # Print a separator line.
+        print(
+            "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(  # noqa: UP032
+                self.gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
+                self.gps.timestamp_utc.tm_mday,  # struct_time object that holds
+                self.gps.timestamp_utc.tm_year,  # the fix time.  Note you might
+                self.gps.timestamp_utc.tm_hour,  # not get all data like year, day,
+                self.gps.timestamp_utc.tm_min,  # month!
+                self.gps.timestamp_utc.tm_sec,
+            )
+        )
+        print(f"Latitude: {self.gps.latitude:.6f} degrees")
+        self.dataMsg += f"Lat {self.gps.latitude:.6f}"
+        print(f"Longitude: {self.gps.longitude:.6f} degrees")
+        self.dataMsg += f"Long {self.gps.longitude:.6f}"
+        print(f"Precise Latitude: {self.gps.latitude_degrees} degs, {self.gps.latitude_minutes:2.4f} mins")
+        self.dataMsg += f"PreciseLat {self.gps.latitude_degrees:.6f}, {self.gps.latitude_minutes:2.4f}"
+        print(f"Precise Longitude: {self.gps.longitude_degrees} degs, {self.gps.longitude_minutes:2.4f} mins")
+        print(f"Fix quality: {self.gps.fix_quality}")
+        # Some attributes beyond latitude, longitude and timestamp are optional
+        # and might not be present.  Check if they're None before trying to use!
+        if self.gps.satellites is not None:
+            print(f"# satellites: {self.gps.satellites}")
+        if self.gps.altitude_m is not None:
+            print(f"Altitude: {self.gps.altitude_m} meters")
+            self.dataMsg += f"Alt {self.gps.altitude_m}"
+        if self.gps.speed_knots is not None:
+            print(f"Speed: {self.gps.speed_knots} knots")
+        if self.gps.speed_kmh is not None:
+            print(f"Speed: {self.gps.speed_kmh} km/h")
+        if self.gps.track_angle_deg is not None:
+            print(f"Track angle: {self.gps.track_angle_deg} degrees")
+        if self.gps.horizontal_dilution is not None:
+            print(f"Horizontal dilution: {self.gps.horizontal_dilution}")
+        if self.gps.height_geoid is not None:
+            print(f"Height geoid: {self.gps.height_geoid} meters")

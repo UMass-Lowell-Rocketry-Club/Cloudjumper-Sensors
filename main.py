@@ -45,6 +45,7 @@ def test_message_format():
     gps = gps_rocketry()
 
     while True:
+        gps.update_gps_data()
         msg = gps.dataMsg
         msg = msg.encode()
         data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
