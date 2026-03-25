@@ -6,6 +6,7 @@ import sx126x # LoRa HAT
 import tomllib # Read configuration file
 import time
 import threading
+from gps import gps_rocketry
 
 config = None
 with open("config.toml", "rb") as f:
@@ -40,7 +41,10 @@ def test_message_format():
     #
     #         receiving node              receiving node                   receiving node           own high 8bit           own low 8bit                 own 
     #         high 8bit address           low 8bit address                    frequency                address                 address                  frequency             message payload
-    msg = "HelloFromVehicle"
+
+    # Test GPS
+    gps = gps_rocketry()
+    msg = gps.dataMsg
     msg = msg.encode()
     data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
 
