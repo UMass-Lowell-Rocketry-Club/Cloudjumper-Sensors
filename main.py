@@ -53,6 +53,7 @@ def test_message_format():
                 print("Sending...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
             msg = radio.receive()
+            if not msg: continue
             if msg.find("GARB"):
                 radio = None
                 radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
@@ -65,6 +66,7 @@ def test_message_format():
             time.sleep(1)
         else:
             r_buff = radio.receive()
+            if not r_buff: continue
             print(r_buff)
             if not r_buff.find("GARB"): # Tag to ensure data integrity
                 # Tell radio to resend
