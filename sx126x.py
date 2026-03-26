@@ -105,7 +105,6 @@ class sx126x:
         # We should pull up the M1 pin when sets the module
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.HIGH)
-        time.sleep(0.1)
 
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
@@ -180,9 +179,7 @@ class sx126x:
         for i in range(2):
             self.ser.write(bytes(self.cfg_reg))
             r_buff = 0
-            time.sleep(0.2)
             if self.ser.in_waiting > 0:
-                time.sleep(0.1)
                 r_buff = self.ser.read(self.ser.in_waiting)
                 if r_buff[0] == 0xC1:
                     pass
@@ -201,7 +198,6 @@ class sx126x:
                 break
             else:
                 print("setting fail,setting again")
-                time.sleep(0.2)
                 print('\x1b[1A',end='\r')
                 if i == 1:
                     print("setting fail,Press Esc to Exit and run again")
@@ -210,17 +206,14 @@ class sx126x:
 
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.LOW)
-        time.sleep(0.1)
 
     def get_settings(self):
         # the pin M1 of lora HAT must be high when enter setting mode and get parameters
         GPIO.output(M1,GPIO.HIGH)
-        time.sleep(0.1)
         
         # send command to get setting parameters
         self.ser.write(bytes([0xC1,0x00,0x09]))
         if self.ser.in_waiting > 0:
-            time.sleep(0.1)
             self.get_reg = self.ser.read(self.ser.in_waiting)
         
         # check the return characters from hat and print the setting parameters
@@ -243,13 +236,11 @@ class sx126x:
     def send(self,data):
         GPIO.output(self.M1,GPIO.LOW)
         GPIO.output(self.M0,GPIO.LOW)
-        time.sleep(0.1)
 
         self.ser.reset_output_buffer()
         self.ser.reset_input_buffer()
         # if self.rssi == True:
             # self.get_channel_rssi()
-        time.sleep(0.1)
 
 
     def receive(self):
@@ -275,12 +266,9 @@ class sx126x:
     def get_channel_rssi(self):
         GPIO.output(self.M1,GPIO.LOW)
         GPIO.output(self.M0,GPIO.LOW)
-        time.sleep(0.1)
         self.ser.write(bytes([0xC0,0xC1,0xC2,0xC3,0x00,0x02]))
-        time.sleep(0.5)
         re_temp = bytes(5)
         if self.ser.in_waiting > 0:
-            time.sleep(0.1)
             re_temp = self.ser.read(self.ser.in_waiting)
         if re_temp[0] == 0xC1 and re_temp[1] == 0x00 and re_temp[2] == 0x02:
             print("the current noise rssi value: -{0}dBm".format(256-re_temp[3]))
