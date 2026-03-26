@@ -260,7 +260,7 @@ class sx126x:
 
             #print("Receive from address\033[1;32m %d with frequency %d.125MHz\033[0m"%((r_buff[0]<<8)+r_buff[1],r_buff[2]+self.start_freq),end='\r\n',flush = True)
             #print("message is "+str(r_buff[3:-1]),end='\r\n')
-            return r_buff
+            return str(r_buff)
             
             # print the rssi
             if self.rssi:
