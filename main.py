@@ -20,6 +20,7 @@ if is_vehicle:
 radio_address = config["setup"]["vehicle_address"] if is_vehicle else config["setup"]["ground_address"]
 send_address = config["setup"]["vehicle_address"] if not is_vehicle else config["setup"]["ground_address"]
 is_delaying = False
+is_print_delaying = False
 output_print_delay = config["setup"]["output_print_delay"] or 5 # Seconds
 
 def delay(seconds: int):
@@ -53,7 +54,12 @@ def test_message_format():
                 print("Sending...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
             msg = radio.receive()
-            if not msg: continue
+            if not msg: 
+                if not is_print_delaying:
+                    print("Didn't receive message")
+                    threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
+                continue
+            print("Found message")
             if msg.find("GARB"):
                 radio = None
                 radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
