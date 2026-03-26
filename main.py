@@ -63,6 +63,7 @@ def test_message_format():
             msg = msg.encode()
             data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
             radio.send(data)
+            time.sleep(1)
         else:
             r_buff = radio.receive()
             if not r_buff: continue
@@ -72,6 +73,7 @@ def test_message_format():
                 msg = "RESEND"
                 data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
                 radio.send(data)
+                time.sleep(1) # Wait for resend
 
             if not is_delaying:
                 print("Receiving...")
