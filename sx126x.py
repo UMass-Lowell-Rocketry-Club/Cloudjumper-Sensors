@@ -98,7 +98,7 @@ class sx126x:
         self.set(freq,addr,power,rssi,air_speed,net_id,buffer_size,crypt,relay,lbt,wor)
 
     def set(self,freq,addr,power,rssi,air_speed=2400,\
-            net_id=0,buffer_size = 240,crypt=0,\
+            net_id=0,buffer_size = 32,crypt=0,\
             relay=False,lbt=False,wor=False):
         self.send_to = addr
         self.addr = addr
