@@ -246,6 +246,7 @@ class sx126x:
     def receive(self):
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.LOW)
+        time.sleep(0.05)
         if self.ser.in_waiting > 0:
             r_buff = self.ser.read_all()
 
