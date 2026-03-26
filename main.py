@@ -60,9 +60,9 @@ def test_message_format():
                     print("Didn't receive message")
                     threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
             print("Found message")
-            if msg.find("GARB"):
-                radio = None
-                radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
+            #if msg.find("GARB"):
+             #   radio = None
+              #  radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
 
             gps.update_gps_data()
             msg = gps.dataMsg
