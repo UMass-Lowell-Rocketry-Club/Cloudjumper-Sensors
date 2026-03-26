@@ -53,12 +53,12 @@ def test_message_format():
             if not is_delaying:
                 print("Sending...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
-            msg = radio.receive()
-            if not msg: 
+            #msg = radio.receive()
+            msg = None
+            if msg: 
                 if not is_delaying:
                     print("Didn't receive message")
                     threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
-                continue
             print("Found message")
             if msg.find("GARB"):
                 radio = None
