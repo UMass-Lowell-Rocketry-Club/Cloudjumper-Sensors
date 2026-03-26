@@ -95,8 +95,6 @@ class sx126x:
 
         # The hardware UART of Pi3B+,Pi4B is /dev/ttyS0
         self.ser = serial.Serial(serial_num,9600)
-        self.ser.reset_input_buffer()
-        self.ser.reset_output_buffer()
         self.set(freq,addr,power,rssi,air_speed,net_id,buffer_size,crypt,relay,lbt,wor)
 
     def set(self,freq,addr,power,rssi,air_speed=2400,\
@@ -108,6 +106,9 @@ class sx126x:
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.HIGH)
         time.sleep(0.1)
+
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
 
         low_addr = addr & 0xff
         high_addr = addr >> 8 & 0xff
@@ -175,7 +176,6 @@ class sx126x:
             self.cfg_reg[9] = 0x03 + rssi_temp
             self.cfg_reg[10] = h_crypt
             self.cfg_reg[11] = l_crypt
-        self.ser.reset_input_buffer()
 
         for i in range(2):
             self.ser.write(bytes(self.cfg_reg))
@@ -201,7 +201,6 @@ class sx126x:
                 break
             else:
                 print("setting fail,setting again")
-                self.ser.reset_input_buffer()
                 time.sleep(0.2)
                 print('\x1b[1A',end='\r')
                 if i == 1:
@@ -212,8 +211,6 @@ class sx126x:
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.LOW)
         time.sleep(0.1)
-        self.ser.reset_input_buffer()
-        self.ser.reset_output_buffer()
 
     def get_settings(self):
         # the pin M1 of lora HAT must be high when enter setting mode and get parameters
@@ -249,19 +246,21 @@ class sx126x:
         time.sleep(0.1)
 
         self.ser.reset_output_buffer()
-        self.ser.write(data)
+        self.ser.reset_input_buffer()
         # if self.rssi == True:
             # self.get_channel_rssi()
         time.sleep(0.1)
 
 
     def receive(self):
+        GPIO.output(self.M0,GPIO.LOW)
+        GPIO.output(self.M1,GPIO.LOW)
         if self.ser.in_waiting > 0:
-            r_buff = self.ser.read(size = self.ser.in_waiting)
+            r_buff = self.ser.read_all()
 
             #print("Receive from address\033[1;32m %d with frequency %d.125MHz\033[0m"%((r_buff[0]<<8)+r_buff[1],r_buff[2]+self.start_freq),end='\r\n',flush = True)
             #print("message is "+str(r_buff[3:-1]),end='\r\n')
-            print(str(r_buff))
+            return r_buff
             
             # print the rssi
             if self.rssi:
@@ -277,7 +276,6 @@ class sx126x:
         GPIO.output(self.M1,GPIO.LOW)
         GPIO.output(self.M0,GPIO.LOW)
         time.sleep(0.1)
-        self.ser.reset_input_buffer()
         self.ser.write(bytes([0xC0,0xC1,0xC2,0xC3,0x00,0x02]))
         time.sleep(0.5)
         re_temp = bytes(5)

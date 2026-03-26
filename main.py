@@ -52,15 +52,27 @@ def test_message_format():
             if not is_delaying:
                 print("Sending...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
+            msg = radio.receive()
+            if msg.find("GARB"):
+                radio = None
+                radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
+
             gps.update_gps_data()
             msg = gps.dataMsg
             msg = msg.encode()
             data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
             radio.send(data)
-            time.sleep(2)
+            time.sleep(1)
         else:
-            radio.receive()
-            time.sleep(2)
+            r_buff = radio.receive()
+            print(r_buff)
+            if not r_buff.find("GARB"): # Tag to ensure data integrity
+                # Tell radio to resend
+                msg = "RESEND"
+                data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
+                radio.send(data)
+                time.sleep(1) # Wait for resend
+
             if not is_delaying:
                 print("Receiving...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
