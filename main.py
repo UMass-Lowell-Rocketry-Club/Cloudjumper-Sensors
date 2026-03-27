@@ -32,18 +32,8 @@ def delay(seconds: int):
     is_delaying = False
 
 def test_message_format():
-    get_rec = ""
-    print("")
-    print("input a string such as \033[1;32m0,868,Hello World\033[0m,it will send `Hello World` to lora node device of address 0 with 868M ")
-    print("please input and press Enter key:",end='',flush=True)
-
     offset_frequence = int(915)-(850 if int(915)>850 else 410)
     radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
-    #
-    # the sending message format
-    #
-    #         receiving node              receiving node                   receiving node           own high 8bit           own low 8bit                 own 
-    #         high 8bit address           low 8bit address                    frequency                address                 address                  frequency             message payload
 
     if is_vehicle:
         gps = gps_rocketry()
@@ -53,47 +43,20 @@ def test_message_format():
             if not is_delaying:
                 print("Sending...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
-            #msg = radio.receive()
-            msg = None
-            if msg: 
-                if not is_delaying:
-                    print("Didn't receive message")
-                    threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
-            print("Found message")
-            #if msg.find("GARB"):
-             #   radio = None
-              #  radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
-
+            
             gps.update_gps_data()
             msg = gps.dataMsg
             msg = msg.encode()
-            data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
+            start = "START".encode()
+            end = "END\0\0\0\0\n".encode()
+            data = start + msg + end
             radio.send(data)
-            time.sleep(1)
+            time.sleep(0.5)
         else:
             r_buff = radio.receive()
-            if not r_buff: continue
-            print(r_buff)
-            if not r_buff.find("GARB"): # Tag to ensure data integrity
-                # Tell radio to resend
-                msg = "RESEND"
-                data = bytes([int(send_address)>>8]) + bytes([int(send_address)&0xff]) + bytes([offset_frequence]) + bytes([radio_address>>8]) + bytes([radio_address&0xff]) + bytes([offset_frequence]) + bytes(msg)
-                radio.send(data)
-                print("Did not find GARB, sending RESEND")
-                time.sleep(1) # Wait for resend
-
             if not is_delaying:
                 print("Receiving...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
 
-
-
-
 if __name__ == '__main__':
-    version_info = sys.version_info
-    if sys.version_info < (3, 12):
-        raise Exception(f'Python version too low: expected 3.13, got {sys.version_info}')
-    elif sys.version_info > (3, 12):
-        # TODO: Use logging modules for this
-        print(f'WARN: Python version {sys.version_info} too high')
     test_message_format()

@@ -94,7 +94,10 @@ class sx126x:
         GPIO.output(self.M1,GPIO.HIGH)
 
         # The hardware UART of Pi3B+,Pi4B is /dev/ttyS0
-        self.ser = serial.Serial(serial_num,9600)
+        self.ser = serial.Serial(serial_num,9600, parity=serial.PARITY_EVEN)
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
+        self.ser.read_all()
         self.set(freq,addr,power,rssi,air_speed,net_id,buffer_size,crypt,relay,lbt,wor)
 
     def set(self,freq,addr,power,rssi,air_speed=2400,\
@@ -106,9 +109,6 @@ class sx126x:
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.HIGH)
         time.sleep(0.1)
-
-        self.ser.reset_input_buffer()
-        self.ser.reset_output_buffer()
 
         low_addr = addr & 0xff
         high_addr = addr >> 8 & 0xff
@@ -123,13 +123,10 @@ class sx126x:
             self.offset_freq = freq_temp
         
         air_speed_temp = self.lora_air_speed_dic.get(air_speed,None)
-        # if air_speed_temp != None
         
         buffer_size_temp = self.lora_buffer_size_dic.get(buffer_size,None)
-        # if air_speed_temp != None:
         
         power_temp = self.lora_power_dic.get(power,None)
-        #if power_temp != None:
 
         if rssi:
             # enable print rssi value 
@@ -138,15 +135,12 @@ class sx126x:
             # disable print rssi value
             rssi_temp = 0x00        
 
-        # get crypt
-        l_crypt = crypt & 0xff
-        h_crypt = crypt >> 8 & 0xff
-        
         if relay==False:
             self.cfg_reg[3] = high_addr
             self.cfg_reg[4] = low_addr
             self.cfg_reg[5] = net_id_temp
             self.cfg_reg[6] = self.SX126X_UART_BAUDRATE_9600 + air_speed_temp
+            self.cfg_reg[6] |= 18 # Enable even parity for UART serial port
             # 
             # it will enable to read noise rssi value when add 0x20 as follow
             # 
@@ -156,65 +150,44 @@ class sx126x:
             # it will output a packet rssi value following received message
             # when enable eighth bit with 06H register(rssi_temp = 0x80)
             #
-            self.cfg_reg[9] = 0x43 + rssi_temp
-            self.cfg_reg[10] = h_crypt
-            self.cfg_reg[11] = l_crypt
-        else:
-            self.cfg_reg[3] = 0x01
-            self.cfg_reg[4] = 0x02
-            self.cfg_reg[5] = 0x03
-            self.cfg_reg[6] = self.SX126X_UART_BAUDRATE_9600 + air_speed_temp
-            # 
-            # it will enable to read noise rssi value when add 0x20 as follow
-            # 
-            self.cfg_reg[7] = buffer_size_temp + power_temp + 0x20
-            self.cfg_reg[8] = freq_temp
-            #
-            # it will output a packet rssi value following received message
-            # when enable eighth bit with 06H register(rssi_temp = 0x80)
-            #
-            self.cfg_reg[9] = 0x03 + rssi_temp
-            self.cfg_reg[10] = h_crypt
-            self.cfg_reg[11] = l_crypt
-
+            self.cfg_reg[9] = 0x4B + rssi_temp
+            self.cfg_reg[10] = 0x00
+            self.cfg_reg[11] = 0x00
+    
         for i in range(2):
             self.ser.write(bytes(self.cfg_reg))
             r_buff = 0
-            time.sleep(0.2)
+            time.sleep(0.25)
             if self.ser.in_waiting > 0:
                 time.sleep(0.1)
                 r_buff = self.ser.read(self.ser.in_waiting)
                 if r_buff[0] == 0xC1:
-                    pass
-                    # print("parameters setting is :",end='')
-                    # for i in self.cfg_reg:
-                        # print(hex(i),end=' ')
+                    print("parameters setting is :",end='')
+                    for i in self.cfg_reg:
+                        print(hex(i),end=' ')
                         
-                    # print('\r\n')
-                    # print("parameters return is  :",end='')
-                    # for i in r_buff:
-                        # print(hex(i),end=' ')
-                    # print('\r\n')
+                    print('\n')
+                    print("parameters return is  :",end='')
+                    for i in r_buff:
+                        print(hex(i),end=' ')
+                    print('\n')
                 else:
-                    pass
-                    #print("parameters setting fail :",r_buff)
+                    print("parameters setting fail :",r_buff)
                 break
             else:
-                print("setting fail,setting again")
+                print("setting fail, setting again")
                 time.sleep(0.2)
                 print('\x1b[1A',end='\r')
                 if i == 1:
-                    print("setting fail,Press Esc to Exit and run again")
-                    # time.sleep(2)
-                    # print('\x1b[1A',end='\r')
+                    print("setting fail")
+                    time.sleep(2)
 
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.LOW)
         time.sleep(0.1)
 
     def get_settings(self):
-        # the pin M1 of lora HAT must be high when enter setting mode and get parameters
-        GPIO.output(M1,GPIO.HIGH)
+        GPIO.output(self.M1,GPIO.HIGH)
         time.sleep(0.1)
         
         # send command to get setting parameters
@@ -232,61 +205,26 @@ class sx126x:
             
             print("Frequence is {0}.125MHz.",fre_temp)
             print("Node address is {0}.",addr_temp)
-            print("Air speed is {0} bps"+ lora_air_speed_dic.get(None,air_speed_temp))
-            print("Power is {0} dBm" + lora_power_dic.get(None,power_temp))
-            GPIO.output(M1,GPIO.LOW)
+            print("Air speed is {0} bps"+ self.lora_air_speed_dic.get(None,air_speed_temp))
+            print("Power is {0} dBm" + self.lora_power_dic.get(None,power_temp))
+            GPIO.output(self.M1,GPIO.LOW)
+            time.sleep(0.1)
 
-#
-# the data format like as following
-# "node address,frequence,payload"
-# "20,868,Hello World"
+
+
     def send(self,data):
         GPIO.output(self.M1,GPIO.LOW)
         GPIO.output(self.M0,GPIO.LOW)
         time.sleep(0.1)
 
         self.ser.reset_output_buffer()
-        self.ser.reset_input_buffer()
-        # if self.rssi == True:
-            # self.get_channel_rssi()
-        time.sleep(0.1)
-
+        self.ser.write(data)
 
     def receive(self):
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.LOW)
-        time.sleep(0.05)
+        time.sleep(0.1)
         if self.ser.in_waiting > 0:
             r_buff = self.ser.read(self.ser.in_waiting)
 
-            #print("Receive from address\033[1;32m %d with frequency %d.125MHz\033[0m"%((r_buff[0]<<8)+r_buff[1],r_buff[2]+self.start_freq),end='\r\n',flush = True)
-            #print("message is "+str(r_buff[3:-1]),end='\r\n')
             return str(r_buff)
-            
-            # print the rssi
-            if self.rssi:
-                pass
-                # print('\x1b[3A',end='\r')
-                #print("the packet rssi value: -{0}dBm".format(256-r_buff[-1:][0]))
-                #self.get_channel_rssi()
-            else:
-                pass
-                #print('\x1b[2A',end='\r')
-
-    def get_channel_rssi(self):
-        GPIO.output(self.M1,GPIO.LOW)
-        GPIO.output(self.M0,GPIO.LOW)
-        time.sleep(0.1)
-        self.ser.write(bytes([0xC0,0xC1,0xC2,0xC3,0x00,0x02]))
-        time.sleep(0.5)
-        re_temp = bytes(5)
-        if self.ser.in_waiting > 0:
-            time.sleep(0.1)
-            re_temp = self.ser.read(self.ser.in_waiting)
-        if re_temp[0] == 0xC1 and re_temp[1] == 0x00 and re_temp[2] == 0x02:
-            print("the current noise rssi value: -{0}dBm".format(256-re_temp[3]))
-            # print("the last receive packet rssi value: -{0}dBm".format(256-re_temp[4]))
-        else:
-            # pass
-            print("receive rssi value fail")
-            # print("receive rssi value fail: ",re_temp)
