@@ -32,7 +32,6 @@ def delay(seconds: int):
     is_delaying = False
 
 def test_message_format():
-    offset_frequence = int(915)-(850 if int(915)>850 else 410)
     radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
 
     if is_vehicle:
@@ -45,16 +44,18 @@ def test_message_format():
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
             
             gps.update_gps_data()
-            msg = gps.dataMsg
-            msg = msg.encode()
-            start = "START".encode()
-            end = "END\0\0\0\0\n".encode()
-            data = start + msg + end
-            radio.send(data)
-            time.sleep(0.5)
+            gps_msg = gps.dataMsg
+            start_msg = "START"
+            timestamp_msg = str(time.time())
+            end_msg = "END\0\n"
+            data_msg = start_msg + timestamp_msg + gps_msg + end_msg
+            data_utf8_bytes = data_msg.encode()
+
+            radio.send(data_utf8_bytes)
+            time.sleep(0.1)
         else:
             r_buff = radio.receive()
-            print(str(r_buff))
+            r_buff.decode
             if not is_delaying:
                 print("Receiving...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()

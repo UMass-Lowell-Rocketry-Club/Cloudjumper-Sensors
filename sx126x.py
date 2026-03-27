@@ -210,8 +210,6 @@ class sx126x:
             GPIO.output(self.M1,GPIO.LOW)
             time.sleep(0.1)
 
-
-
     def send(self,data):
         GPIO.output(self.M1,GPIO.LOW)
         GPIO.output(self.M0,GPIO.LOW)
@@ -226,5 +224,4 @@ class sx126x:
         time.sleep(0.1)
         if self.ser.in_waiting > 0:
             r_buff = self.ser.read(self.ser.in_waiting)
-
-            return str(r_buff)
+            return r_buff
