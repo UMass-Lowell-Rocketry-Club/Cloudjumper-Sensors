@@ -24,7 +24,7 @@ send_address = config["setup"]["vehicle_address"] if not is_vehicle else config[
 is_delaying = False
 is_print_delaying = False
 output_print_delay = config["setup"]["output_print_delay"] or 5 # Seconds
-log_filename="gps_log"
+log_filename="gps_log.csv"
 log_queue = Queue()
 
 def csv_logger(filename, queue):
