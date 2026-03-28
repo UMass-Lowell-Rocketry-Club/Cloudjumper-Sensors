@@ -10,8 +10,8 @@ class sgp30_rocketry:
         with open("config.toml", "rb") as f:
             self.config = tomllib.load(f)
         assert(self.config is not None)
-        temperature_celsius = self.config["vehicle"]["sgp30_temperature_celsius"] or 15
-        relative_humidity = self.config["vehicle"]["sgp30_relative_humidity_percent"] or 50
+        temperature_celsius = self.config["vehicle"]["setup"]["sgp30_temperature_celsius"] or 15
+        relative_humidity = self.config["vehicle"]["setup"]["sgp30_relative_humidity_percent"] or 50
         i2c = board.I2C()
         self.sgp30 = adafruit_sgp30.Adafruit_SGP30(i2c)
         print("SGP30: serial #", [hex(i) for i in self.sgp30.serial])
