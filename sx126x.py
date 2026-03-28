@@ -92,6 +92,7 @@ class sx126x:
         GPIO.setup(self.M1,GPIO.OUT)
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.HIGH)
+        time.sleep(0.5)
 
         # The hardware UART of Pi3B+,Pi4B is /dev/ttyS0
         self.ser = serial.Serial(serial_num,9600, parity=serial.PARITY_EVEN)
@@ -108,7 +109,7 @@ class sx126x:
         # We should pull up the M1 pin when sets the module
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.HIGH)
-        time.sleep(0.1)
+        time.sleep(0.5)
 
         low_addr = addr & 0xff
         high_addr = addr >> 8 & 0xff
@@ -184,11 +185,12 @@ class sx126x:
 
         GPIO.output(self.M0,GPIO.LOW)
         GPIO.output(self.M1,GPIO.LOW)
-        time.sleep(0.1)
+        time.sleep(0.5)
 
     def get_settings(self):
         GPIO.output(self.M1,GPIO.HIGH)
-        time.sleep(0.1)
+        time.sleep(0.5)
+        self.ser.clear_input_bufer()
         
         # send command to get setting parameters
         self.ser.write(bytes([0xC1,0x00,0x09]))
@@ -208,7 +210,7 @@ class sx126x:
             print("Air speed is {0} bps"+ self.lora_air_speed_dic.get(None,air_speed_temp))
             print("Power is {0} dBm" + self.lora_power_dic.get(None,power_temp))
             GPIO.output(self.M1,GPIO.LOW)
-            time.sleep(0.1)
+            time.sleep(0.5)
 
     def send(self,data):
         GPIO.output(self.M1,GPIO.LOW)
@@ -219,9 +221,10 @@ class sx126x:
         self.ser.write(data)
 
     def receive(self):
-        GPIO.output(self.M0,GPIO.LOW)
-        GPIO.output(self.M1,GPIO.LOW)
-        time.sleep(0.1)
+        if GPIO.input(self.M0) != GPIO.LOW or GPIO.input(self.M1) != GPIO.HIGH:
+            GPIO.output(self.M0,GPIO.LOW)
+            GPIO.output(self.M1,GPIO.LOW)
+            time.sleep(0.5)
         if self.ser.in_waiting > 0:
             r_buff = self.ser.read(self.ser.in_waiting)
             return r_buff
