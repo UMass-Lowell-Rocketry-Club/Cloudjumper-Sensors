@@ -54,6 +54,7 @@ def test_message_format():
 
     if is_vehicle:
         gps = gps_rocketry()
+        sgp30 = sgp30_rocketry()
 
     while True:
         if is_vehicle:
@@ -63,10 +64,11 @@ def test_message_format():
             
             gps.update_gps_data()
             gps_msg = gps.dataMsg
+            sgp30_msg = sgp30.get_measurements()
             start_msg = "START"
             timestamp = time.time()
             end_msg = "END"
-            data_msg = start_msg + str(timestamp) + gps_msg + end_msg
+            data_msg = start_msg + str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + end_msg
             log_queue.put([time.time(), data_msg])
 
             data_utf8_bytes = data_msg.encode()
