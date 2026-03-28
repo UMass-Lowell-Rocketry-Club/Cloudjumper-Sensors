@@ -65,7 +65,7 @@ def test_message_format():
             gps_msg = gps.dataMsg
             start_msg = "START"
             timestamp = time.time()
-            end_msg = "END\0\n"
+            end_msg = "END"
             data_msg = start_msg + str(timestamp) + gps_msg + end_msg
             log_queue.put([time.time(), data_msg])
 
@@ -75,7 +75,7 @@ def test_message_format():
             time.sleep(0.1)
         else:
             r_buff = radio.receive()
-            received_msg = r_buff and r_buff.decode() or None
+            received_msg = r_buff and str(r_buff) or None
             if received_msg:
                 log_queue.put([time.time(), received_msg])
                 print(received_msg)
