@@ -17,7 +17,7 @@ radio = None
 is_vehicle = config["setup"]["is_vehicle"]
 if is_vehicle:
     from gps import gps_rocketry
-    from sgp30_rocketry import sgp30_rocketry
+    from sgp30_rocketry import sgp30_sensor
 
 radio_address = config["setup"]["vehicle_address"] if is_vehicle else config["setup"]["ground_address"]
 send_address = config["setup"]["vehicle_address"] if not is_vehicle else config["setup"]["ground_address"]
@@ -54,7 +54,7 @@ def test_message_format():
 
     if is_vehicle:
         gps = gps_rocketry()
-        sgp30 = sgp30_rocketry()
+        sgp30 = sgp30_sensor()
 
     while True:
         if is_vehicle:
