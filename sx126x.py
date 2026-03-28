@@ -217,12 +217,14 @@ class sx126x:
             GPIO.output(self.M1,GPIO.LOW)
             GPIO.output(self.M0,GPIO.LOW)
             time.sleep(0.5)
+            self.ser.reset_input_buffer()
+            self.ser.reset_output_buffer()
+            self.ser.read_all()
 
-        self.ser.reset_output_buffer()
         self.ser.write(data)
 
     def receive(self):
-        if GPIO.input(self.M0) != GPIO.LOW or GPIO.input(self.M1) != GPIO.HIGH:
+        if GPIO.input(self.M0) != GPIO.LOW or GPIO.input(self.M1) != GPIO.LOW:
             GPIO.output(self.M0,GPIO.LOW)
             GPIO.output(self.M1,GPIO.LOW)
             time.sleep(0.5)
