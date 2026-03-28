@@ -75,9 +75,10 @@ def test_message_format():
             time.sleep(0.1)
         else:
             r_buff = radio.receive()
-            if r_buff:
-                log_queue.put([time.time(), r_buff])
-                print(str(r_buff))
+            received_msg = r_buff and r_buff.decode() or None
+            if received_msg:
+                log_queue.put([time.time(), received_msg])
+                print(received_msg)
             if not is_delaying:
                 print("Receiving..." and ("no buff" if not r_buff else ""))
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()

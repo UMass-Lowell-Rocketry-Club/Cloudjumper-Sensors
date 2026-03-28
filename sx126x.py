@@ -190,7 +190,7 @@ class sx126x:
     def get_settings(self):
         GPIO.output(self.M1,GPIO.HIGH)
         time.sleep(0.5)
-        self.ser.clear_input_bufer()
+        self.ser.reset_input_buffer()
         
         # send command to get setting parameters
         self.ser.write(bytes([0xC1,0x00,0x09]))
@@ -213,9 +213,10 @@ class sx126x:
             time.sleep(0.5)
 
     def send(self,data):
-        GPIO.output(self.M1,GPIO.LOW)
-        GPIO.output(self.M0,GPIO.LOW)
-        time.sleep(0.1)
+        if GPIO.input(self.M0) != GPIO.LOW or GPIO.input(self.M1) != GPIO.LOW:
+            GPIO.output(self.M1,GPIO.LOW)
+            GPIO.output(self.M0,GPIO.LOW)
+            time.sleep(0.5)
 
         self.ser.reset_output_buffer()
         self.ser.write(data)
