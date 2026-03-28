@@ -22,5 +22,5 @@ class sgp30_sensor:
         print(f"SGP30: Baseline eC02 = 0x{self.sgp30.baseline_eCO2:x}, TVOC = 0x{self.sgp30.baseline_TVOC:x}")
 
     def get_measurements(self) -> str:
-        msg = f"eCO2: {self.sgp30.eCO2()} | TVOC: {self.sgp30.TVOC()}"
+        msg = f"eCO2: {self.sgp30.eCO2} | TVOC: {self.sgp30.TVOC}"
         return msg
