@@ -4,9 +4,9 @@ import busio
 import tomllib
 import adafruit_sgp30
 
-class sgp30_rocketry:
+class sgp30_sensor:
     def __init__(self):
-        config = None
+        self.config = None
         with open("config.toml", "rb") as f:
             self.config = tomllib.load(f)
         assert(self.config is not None)
