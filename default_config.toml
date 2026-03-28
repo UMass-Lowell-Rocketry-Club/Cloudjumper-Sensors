@@ -10,5 +10,7 @@ output_print_delay = 5 # Seconds to wait before sending heartbeat messages such 
 
 [setup.vehicle]
 sensors = ["gps"]
+sgp30_temperature_celsius = -8.8
+sgp30_relative_humidity_percent = 63
 
 #[setup.ground]

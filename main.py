@@ -1,7 +1,6 @@
 # Copyright 2026 UMass Lowell Rocketry
 
 ## This file contains the code for the radio
-import sys
 import sx126x # LoRa HAT
 import tomllib # Read configuration file
 import time
@@ -18,6 +17,7 @@ radio = None
 is_vehicle = config["setup"]["is_vehicle"]
 if is_vehicle:
     from gps import gps_rocketry
+    from sgp30_rocketry import sgp30_rocketry
 
 radio_address = config["setup"]["vehicle_address"] if is_vehicle else config["setup"]["ground_address"]
 send_address = config["setup"]["vehicle_address"] if not is_vehicle else config["setup"]["ground_address"]
