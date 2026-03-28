@@ -95,7 +95,7 @@ class sx126x:
         time.sleep(0.5)
 
         # The hardware UART of Pi3B+,Pi4B is /dev/ttyS0
-        self.ser = serial.Serial(serial_num,9600, parity=serial.PARITY_EVEN)
+        self.ser = serial.Serial(serial_num,9600)
         self.ser.reset_input_buffer()
         self.ser.reset_output_buffer()
         self.ser.read_all()
@@ -141,7 +141,7 @@ class sx126x:
             self.cfg_reg[4] = low_addr
             self.cfg_reg[5] = net_id_temp
             self.cfg_reg[6] = self.SX126X_UART_BAUDRATE_9600 + air_speed_temp
-            self.cfg_reg[6] |= 18 # Enable even parity for UART serial port
+            #self.cfg_reg[6] |= 18 # Enable even parity for UART serial port
             # 
             # it will enable to read noise rssi value when add 0x20 as follow
             # 
