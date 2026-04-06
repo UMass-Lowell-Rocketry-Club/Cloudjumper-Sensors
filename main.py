@@ -8,6 +8,7 @@ import threading
 import csv
 from queue import Queue 
 
+start_time=time.time()
 config = None
 with open("config.toml", "rb") as f:
     config = tomllib.load(f)
@@ -66,7 +67,7 @@ def test_message_format():
             gps_msg = gps.dataMsg
             sgp30_msg = sgp30.get_measurements()
             start_msg = "START"
-            timestamp = time.time()
+            timestamp = round(time.time()-start_time,5) #calculates when this was received from when code was started up
             end_msg = "END"
             data_msg = start_msg + str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + end_msg
             log_queue.put([time.time(), data_msg])
