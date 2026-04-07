@@ -87,7 +87,7 @@ def test_message_format():
             }
             #JSON formatting ends here
             data_msg=(json.dumps(msg_dict)+"\n")
-            log_queue.put([timestamp, json.dumps(msg_dict)])
+            log_queue.put([timestamp, data_msg.strip()])
 
             #data_msg = start_msg + str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + end_msg
             #log_queue.put([time.time(), data_msg])
@@ -114,7 +114,7 @@ def test_message_format():
                 print(f"[WARN] Bad packet: {e}")
             except KeyError as e:
                 print(f"[WARN] Missing field in packet: {e}")
-           
+           #Original code
             """received_msg = r_buff and str(r_buff) or None
             if received_msg:
                 log_queue.put([time.time(), received_msg])
