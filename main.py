@@ -7,10 +7,7 @@ import time
 import threading
 import csv
 from queue import Queue 
-import json
 
-json_counter=0
-start_time=time.time()
 config = None
 with open("config.toml", "rb") as f:
     config = tomllib.load(f)
@@ -68,60 +65,25 @@ def test_message_format():
             gps.update_gps_data()
             gps_msg = gps.dataMsg
             sgp30_msg = sgp30.get_measurements()
-            #start_msg = "START"
-            timestamp = round(time.time()-start_time,5) #calculates when this was received from when code was started up
-            #end_msg = "END"
-
-            #JSON formatting starts here 
-            msg_dict = {
-                "count":json_counter,
-                "time":timestamp,
-                "sensors": {
-                    "gps": {
-                        "data":gps_msg,
-                    },
-                    "sgp30": {
-                        "data":sgp30_msg,
-                    }
-                }
-            }
-            #JSON formatting ends here
-            data_msg=(json.dumps(msg_dict)+"\n")
-            log_queue.put([timestamp, data_msg.strip()])
-
-            #data_msg = start_msg + str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + end_msg
-            #log_queue.put([time.time(), data_msg])
+            start_msg = "START"
+            timestamp = time.time()
+            end_msg = "END"
+            data_msg = start_msg + str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + end_msg
+            log_queue.put([time.time(), data_msg])
 
             data_utf8_bytes = data_msg.encode()
 
             radio.send(data_utf8_bytes)
-            json_counter+=1
             time.sleep(0.1)
         else:
             r_buff = radio.receive()
-            try:
-                received_msg=r_buff.decode("utf-8").strip()
-                msg=json.loads(received_msg)
-                count = msg["count"]
-                timestamp = msg["time"]
-                gps_data = msg["sensors"]["gps"]["data"]
-                sgp30_data = msg["sensors"]["sgp30"]["data"]
-
-                
-                log_queue.put([time.time(), received_msg])
-                print(f"[{count}] | {timestamp:.5f}s | GPS: {gps_data} | sgp30: {sgp30_data}")
-            except (UnicodeDecodeError, json.JSONDecodeError) as e:
-                print(f"[WARN] Bad packet: {e}")
-            except KeyError as e:
-                print(f"[WARN] Missing field in packet: {e}")
-           #Original code
-            """received_msg = r_buff and str(r_buff) or None
+            received_msg = r_buff and str(r_buff) or None
             if received_msg:
                 log_queue.put([time.time(), received_msg])
                 print(received_msg)
             if not is_delaying:
                 print("Receiving..." and ("no buff" if not r_buff else ""))
-                threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()"""
-            
+                threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
+
 if __name__ == '__main__':
     test_message_format()
