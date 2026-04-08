@@ -214,3 +214,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+changes.txt
+ground_gps_log.csv
+new_ground_gps_log.csv
+parser.py
+run_parser.sh
