@@ -6,7 +6,20 @@ import tomllib # Read configuration file
 import time
 import threading
 import csv
-from queue import Queue 
+from queue import Queue
+from dataclasses import dataclass, field
+from gps import GPS
+from sgp30_rocketry import SGP30
+
+@dataclass
+class Packet:
+    """Class to parse through the csvs and make individual packets"""
+    start_flag: str = field(default="S")
+    count: int
+    time: float
+    gps: GPS | None
+    sgp30: SGP30 | None
+    end_flag: str = field(default="E")
 
 config = None
 with open("config.toml", "rb") as f:
@@ -18,7 +31,7 @@ is_vehicle = config["setup"]["is_vehicle"]
 if is_vehicle:
     from gps import gps_rocketry
     from sgp30_rocketry import sgp30_sensor
-
+num = 0
 radio_address = config["setup"]["vehicle_address"] if is_vehicle else config["setup"]["ground_address"]
 send_address = config["setup"]["vehicle_address"] if not is_vehicle else config["setup"]["ground_address"]
 is_delaying = False
@@ -62,18 +75,26 @@ def test_message_format():
                 print("Sending...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
             
-            gps.update_gps_data()
-            gps_msg = gps.dataMsg
-            sgp30_msg = sgp30.get_measurements()
-            start_msg = "START"
-            timestamp = time.time()
-            end_msg = "END"
-            data_msg = start_msg + str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + end_msg
+            #gps.update_gps_data()
+            #gps_msg = gps.dataMsg
+            #sgp30_msg = sgp30.get_measurements()
+            packet = Packet(
+                count=num,
+                time=time.time(), #change later
+                gps=gps.update_gps_data(),
+                sgp30=sgp30.get_measurements()
+            )
+            #start_msg = "START"
+            #timestamp = time.time()
+            #end_msg = "END"
+            #data_msg = start_msg + str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + end_msg
+            data_msg=str(packet)
             log_queue.put([time.time(), data_msg])
 
             data_utf8_bytes = data_msg.encode()
 
             radio.send(data_utf8_bytes)
+            num+=1
             time.sleep(0.1)
         else:
             r_buff = radio.receive()

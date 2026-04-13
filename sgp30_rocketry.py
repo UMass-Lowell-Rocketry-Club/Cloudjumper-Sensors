@@ -3,6 +3,16 @@ import board
 import busio
 import tomllib
 import adafruit_sgp30
+from dataclasses import dataclass
+### Capabilities of the SGP30 sensor include Ethanol, H2, TVOC, and eCO2
+
+@dataclass
+class SGP30:
+    ethanol: int | None
+    h2: int | None
+    eco2:  int | None         
+    tvoc: int | None     
+    
 
 class sgp30_sensor:
     def __init__(self):
@@ -21,6 +31,18 @@ class sgp30_sensor:
 
         print(f"SGP30: Baseline eC02 = 0x{self.sgp30.baseline_eCO2:x}, TVOC = 0x{self.sgp30.baseline_TVOC:x}")
 
-    def get_measurements(self) -> str:
-        msg = f"eCO2: {self.sgp30.eCO2} | TVOC: {self.sgp30.TVOC}"
-        return msg
+    def check_attr(self, attr):
+        try:
+            val = getattr(self.sgp30, attr)
+            return val if isinstance(val, int) else None
+        except(AttributeError,RuntimeError):
+            return None
+    def get_measurements(self) -> SGP30:
+        return SGP30(
+            ethanol=self.check_attr("Ethanol"),
+            h2= self.check_attr("H2"),
+            eco2=self.check_attr("eCO2"),
+            tvoc= self.check_attr("TVOC")
+        )
+        #msg = f"eCO2: {self.sgp30.eCO2} | TVOC: {self.sgp30.TVOC}"
+        #return msg

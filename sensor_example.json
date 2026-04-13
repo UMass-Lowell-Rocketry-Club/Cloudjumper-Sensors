@@ -1,20 +1,8 @@
 {
-    "time":12.12345,
-    "sensors": {
-        "gps": {
-            "has_fix": true,
-            "latitude": 47.000299,
-            "longitude": -22.987373,
-            "altitude": 1000,
-            "speed_knots": 42,
-            "timestamp_utc": 1770332595
-        },
-        "sgp30": {
-            "ready": false,
-            "ethanol": 0.82,
-            "h2": 222,
-            "tvoc": 999,
-            "eCO2": 62
-        }
-    }
+    "start_flag":,
+    "count":,
+    "time":,
+    "gps": ,
+    "sgp30": ,
+    "end_flag":
 }

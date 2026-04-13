@@ -4,6 +4,26 @@ import board
 import busio
 
 import adafruit_gps
+from dataclasses import dataclass
+
+@dataclass
+class GPS:
+    timestamp: str | None
+    latitude: float | None         
+    longitude: float | None
+    #precise_lat_deg: float | None
+    #precise_lat_m: float | None
+    #precise_long_deg: float | None
+    #precise_long_m: float | None
+    #fix: bool | None
+    #satellites: int | None
+    #altitude: float | None
+    #altitude_m: float | None
+    #speed_knots: float | None
+    #track_angle: float | None
+    #horizontal_dil: float | None
+    #height_geoid: float | None
+
 
 
 class gps_rocketry:
