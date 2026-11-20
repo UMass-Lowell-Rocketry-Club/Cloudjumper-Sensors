@@ -6,6 +6,7 @@ import tomllib # Read configuration file
 import time
 import threading
 import csv
+import rtc
 from queue import Queue 
 
 config = None
@@ -18,6 +19,7 @@ is_vehicle = config["setup"]["is_vehicle"]
 if is_vehicle:
     from gps import gps_rocketry
     from sgp30_rocketry import sgp30_sensor
+    from bno085_rocketry import bno085_sensor
 
 radio_address = config["setup"]["vehicle_address"] if is_vehicle else config["setup"]["ground_address"]
 send_address = config["setup"]["vehicle_address"] if not is_vehicle else config["setup"]["ground_address"]
@@ -55,6 +57,7 @@ def test_message_format():
     if is_vehicle:
         gps = gps_rocketry()
         sgp30 = sgp30_sensor()
+        bno085 = bno085_sensor()
 
     while True:
         if is_vehicle:
@@ -65,13 +68,15 @@ def test_message_format():
             gps.update_gps_data()
             gps_msg = gps.dataMsg
             sgp30_msg = sgp30.get_measurements()
-            start_msg = "START"
+            bno085_msg: str = bno085.get_measurements()
             timestamp = time.time()
-            end_msg = "END"
-            data_msg = start_msg + str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + end_msg
-            log_queue.put([time.time(), data_msg])
+            data_msg = str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + "\nBNO085: " + bno085_msg
+            start_msg = "START"
+            end_msg = "END " + len(data_msg)
+            final_msg: str = start_msg + data_msg + end_msg
+            log_queue.put([time.time(), final_msg])
 
-            data_utf8_bytes = data_msg.encode()
+            data_utf8_bytes = final_msg.encode()
 
             radio.send(data_utf8_bytes)
             time.sleep(0.1)

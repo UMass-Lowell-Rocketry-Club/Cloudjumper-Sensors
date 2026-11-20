@@ -2,6 +2,7 @@ import time
 
 import board
 import busio
+import rtc
 
 import adafruit_gps
 
@@ -57,16 +58,24 @@ class gps_rocketry:
         # gps.send_command(b'PMTK220,500')
 
 
+
     def update_gps_data(self):
+        self.dataMsg = ""
         self.gps.update()
         # Every second print out current location details if there's a fix.
         current = time.monotonic()
+        if not self.gps.timestamp_utc:
+            self.dataMsg += "NoTime"
+        else:
+            # Use the GPS' time to adjust the real time clock of the board
+            rtc.set_time_source(self.gps)
+
+
         if not self.gps.has_fix:
             # Try again if we don't have a fix yet.
-            self.dataMsg = "NoFix"
+            self.dataMsg += "NoFix"
             print("Waiting for fix...")
             return
-        self.dataMsg = ""
         # We have a fix! (gps.has_fix is true)
         # Print out details about the fix like location, date, etc.
         print("=" * 40)  # Print a separator line.
