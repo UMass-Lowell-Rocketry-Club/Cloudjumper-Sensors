@@ -2,7 +2,6 @@ import time
 
 import board
 import busio
-import rtc
 
 import adafruit_gps
 
