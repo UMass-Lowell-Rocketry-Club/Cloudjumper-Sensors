@@ -65,11 +65,6 @@ class gps_rocketry:
         current = time.monotonic()
         if not self.gps.timestamp_utc:
             self.dataMsg += "NoTime"
-        else:
-            # Use the GPS' time to adjust the real time clock of the board
-            rtc.set_time_source(self.gps)
-
-
         if not self.gps.has_fix:
             # Try again if we don't have a fix yet.
             self.dataMsg += "NoFix"
