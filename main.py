@@ -6,7 +6,6 @@ import tomllib # Read configuration file
 import time
 import threading
 import csv
-import rtc
 from queue import Queue 
 
 config = None
@@ -67,12 +66,13 @@ def test_message_format():
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
             gps.update_gps_data()
             if not time_source_set and gps.gps.timestamp_utc:
-                rtc.set_time_source(gps.gps)
                 time_source_set = True
             gps_msg = gps.dataMsg
             sgp30_msg = sgp30.get_measurements()
             bno085_msg: str = bno085.get_measurements()
             timestamp = time.time()
+            if time_source_set:
+                timestamp = gps.gps.timestamp_utc
             data_msg = str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + "\nBNO085: " + bno085_msg
             start_msg = "START"
             end_msg = "END " + len(data_msg)
