@@ -53,19 +53,22 @@ def delay(seconds: int):
 
 def test_message_format():
     radio = sx126x.sx126x(serial_num = config["setup"]["serial_port"],freq=config["setup"]["frequency"],addr=radio_address,power=config["setup"]["transmit_power"],rssi=True,air_speed=config["setup"]["air_speed"],relay=False)
-
+    time_source_set = False
     if is_vehicle:
         gps = gps_rocketry()
         sgp30 = sgp30_sensor()
         bno085 = bno085_sensor()
+        
 
     while True:
         if is_vehicle:
             if not is_delaying:
                 print("Sending...")
                 threading.Thread(target=delay, kwargs={"seconds": output_print_delay}).start()
-            
             gps.update_gps_data()
+            if not time_source_set and gps.gps.timestamp_utc:
+                rtc.set_time_source(gps.gps)
+                time_source_set = True
             gps_msg = gps.dataMsg
             sgp30_msg = sgp30.get_measurements()
             bno085_msg: str = bno085.get_measurements()
