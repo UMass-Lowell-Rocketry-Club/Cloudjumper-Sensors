@@ -75,7 +75,7 @@ def test_message_format():
                 timestamp = gps.gps.timestamp_utc
             data_msg = str(timestamp) + gps_msg + "\nSGP30: " + sgp30_msg + "\nBNO085: " + bno085_msg
             start_msg = "START"
-            end_msg = "END " + len(data_msg)
+            end_msg = "END " + str(len(data_msg))
             final_msg: str = start_msg + data_msg + end_msg
             log_queue.put([time.time(), final_msg])
 
